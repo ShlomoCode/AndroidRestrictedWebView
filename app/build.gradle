@@ -2,13 +2,23 @@ plugins {
     id 'com.android.application'
 }
 
+
 android {
-    compileSdkVersion 33
+   signingConfigs {
+        release {
+            storeFile = file("keystore/android_keystore.jks")
+            storePassword System.getenv("SIGNING_STORE_PASSWORD")
+            keyAlias System.getenv("SIGNING_KEY_ALIAS")
+            keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+        }
+    }
+    
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.webview.myapplication" //Change Your package ID here
         minSdkVersion 26
-        targetSdkVersion 31
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
 
@@ -20,6 +30,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {

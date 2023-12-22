@@ -1,0 +1,106 @@
+name: 🤖 Generate Android App
+
+on:
+    workflow_dispatch:
+        inputs:
+            id:
+              description: 'Run identifier'
+              required: true
+            domain:
+                description: 'URL of the Website'
+                required: true
+            app_name:
+                description: 'Name of the App'
+                required: true
+            force_portrait:
+                description: 'Force Portrait Mode'
+                type: boolean
+                required: true
+                default: false
+
+jobs:
+    id:
+      # https://stackoverflow.com/a/73837663
+      name: Workflow ID Provider
+      runs-on: ubuntu-latest
+      steps:
+        - name: ${{github.event.inputs.id}}
+          run: echo run identifier ${{ inputs.id }}
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+            - name: Validate domain
+              run: |
+                  # Remove protocol from URL if present
+                  DOMAIN="${{ inputs.domain }}"
+                  DOMAIN="${DOMAIN#http://}"
+                  DOMAIN="${DOMAIN#https://}"
+
+                  # Remove path from URL if present
+                  DOMAIN="${DOMAIN%%/*}"
+                  
+                  # Check if the URL is a valid domain
+                  if ! [[ $DOMAIN =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+                  echo "Error: Invalid domain format!"
+                  exit 1
+                  fi
+                  
+                  # save as env variable
+                  echo "DOMAIN=$DOMAIN" >> $GITHUB_ENV
+            - name: Update URL in MainActivity.java
+              run: sed -i "33s|example.com|$DOMAIN|" /home/runner/work/AndroidRestrictedWebView/AndroidRestrictedWebView/app/src/main/java/com/webview/myapplication/MainActivity.java
+            - name: Update FORCE_PORTRAIT in MainActivity.java
+              run: sed -i "34s|false|${{ inputs.force_portrait }}|" /home/runner/work/AndroidRestrictedWebView/AndroidRestrictedWebView/app/src/main/java/com/webview/myapplication/MainActivity.java
+            - name: Validate app_name input
+              run: |
+                  if ! perl -e "exit 1 unless '${{ inputs.app_name }}' =~ /^[:a-zA-Zא-ת0-9 _-]+$/"; then
+                    echo "Error: Invalid app_name format!"
+                    exit 1
+                  fi
+            - name: Update app_name in strings.xml
+              run: |
+                  sed -i "2s|AndroidRestrictedWebView|${{ inputs.app_name }}|" /home/runner/work/AndroidRestrictedWebView/AndroidRestrictedWebView/app/src/main/res/values/strings.xml
+            - name: Update applicationId in build.gradle
+              run: sed -i "19s|com.webview.myapplication|com.restictedwebview.${{ env.DOMAIN }}|" /home/runner/work/AndroidRestrictedWebView/AndroidRestrictedWebView/app/build.gradle
+            - name: Set up JDK 17
+              uses: actions/setup-java@v4
+              with:
+                  java-version: 17
+                  distribution: 'temurin'
+            - name: Make gradlew executable
+              run: chmod +x ./gradlew
+            - name: Decode Keystore
+              id: decode_keystore
+              uses: timheuer/base64-to-file@v1.2.4
+              with:
+                  fileName: 'android_keystore.jks'
+                  fileDir: '/home/runner/work/AndroidRestrictedWebView/AndroidRestrictedWebView/app/keystore/'
+                  encodedString: ${{ secrets.KEYSTORE }}
+            - name: Build APK
+              run: ./gradlew assembleRelease
+              env:
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+            - name: Rename APK
+              run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/webview-${{ env.DOMAIN }}.apk
+            - name: Create Release
+              id: create_release
+              uses: softprops/action-gh-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: v${{ github.run_id }}
+                  name: Release v${{ github.run_id }} (${{ env.DOMAIN }})
+                  prerelease: true
+                  files: app/build/outputs/apk/release/webview-${{ env.DOMAIN }}.apk
+                  body: |
+                      Restricted WebView App.
+                      Domain: [${{ env.DOMAIN }}](//${{ env.DOMAIN }})
+                      App Name: ${{ inputs.app_name }}
+                      Force Portrait: `${{ inputs.force_portrait }}`
+            - name: Get the APK URL
+              run: |
+                echo "APK URL: ${{ fromJSON(steps.create_release.outputs.assets)[0].browser_download_url }}"
