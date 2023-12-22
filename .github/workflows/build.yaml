@@ -1,4 +1,7 @@
 name: 🤖 Generate Android App
+permissions:
+    # actions: read
+    contents: write
 
 on:
     workflow_dispatch:
