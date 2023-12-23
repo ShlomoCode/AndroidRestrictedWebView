@@ -8,10 +8,10 @@ To configure the application and set the allowed website, follow these steps:
 
 1. Open the project in Android Studio.
 2. Navigate to the `MainActivity.java` file.
-3. Locate the line 33 containing the `ALLOWED_URL` constant.
-4. Replace the value of the `ALLOWED_URL` constant with the desired URL for the allowed site.
+3. Locate the line 33 containing the `ALLOWED_DOMAIN` constant.
+4. Replace the value of the `ALLOWED_DOMAIN` constant with the desired URL for the allowed site.
    ```java
-   private static final String ALLOWED_URL = "www.example.com";
+   private static final String ALLOWED_DOMAIN = "www.example.com";
    ```
 5. Save the changes.
 

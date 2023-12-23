@@ -16,7 +16,11 @@ android {
     compileSdkVersion 34
 
     defaultConfig {
-        applicationId "com.webview.myapplication" //Change Your package ID here
+        buildConfigField "String", "ALLOWED_DOMAIN", "\"${System.getenv('ALLOWED_DOMAIN') ?: 'google.com'}\""
+        buildConfigField "boolean", "FORCE_PORTRAIT", System.getenv("FORCE_PORTRAIT") ?: "false"
+        resValue "string", "app_name", System.getenv('APP_NAME') ?: "My Application"
+        applicationId System.getenv('APPLICATION_ID') ?: "com.webview.myapplication"
+        
         minSdkVersion 26
         targetSdkVersion 34
         versionCode 1

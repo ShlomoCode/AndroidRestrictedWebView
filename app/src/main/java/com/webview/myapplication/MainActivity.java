@@ -30,8 +30,8 @@ import androidx.core.app.ActivityCompat;
 
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
-    private static final String ALLOWED_URL = "example.com";  // Replace with the desired URL
-    private static final boolean FORCE_PORTRAIT = false; // True = force portrait mode
+    private static final String ALLOWED_DOMAIN = BuildConfig.ALLOWED_DOMAIN;
+    private static final boolean FORCE_PORTRAIT = BuildConfig.FORCE_PORTRAIT;
     private WebView mWebView;
     private View mCustomView;
     private CustomViewCallback mCustomViewCallback;
@@ -116,13 +116,13 @@ public class MainActivity extends Activity {
             dm.enqueue(request);
             Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
         });
-        mWebView.loadUrl("https://" + ALLOWED_URL);
+        mWebView.loadUrl("https://" + ALLOWED_DOMAIN);
     }
 
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
-            if (Uri.parse(url).getHost().equals(ALLOWED_URL)) {
+            if (Uri.parse(url).getHost().equals(ALLOWED_DOMAIN)) {
                 mProgressBar.setVisibility(View.VISIBLE);
                 view.loadUrl(url);
                 return true;
