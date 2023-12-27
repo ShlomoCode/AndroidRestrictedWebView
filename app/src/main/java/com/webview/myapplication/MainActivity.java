@@ -31,7 +31,7 @@ import androidx.core.app.ActivityCompat;
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
     private static final String ALLOWED_DOMAIN = BuildConfig.ALLOWED_DOMAIN;
-    private static final boolean FORCE_PORTRAIT = BuildConfig.FORCE_PORTRAIT;
+    private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
     private WebView mWebView;
     private View mCustomView;
     private CustomViewCallback mCustomViewCallback;
@@ -61,8 +61,12 @@ public class MainActivity extends Activity {
         }
         super.onCreate(savedInstanceState);
 
-        if (FORCE_PORTRAIT) {
+        if (VIEW_MODE == "PORTRAIT") {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else if (VIEW_MODE == "LANDSCAPE") {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
 
         setContentView(R.layout.activity_main);
@@ -94,8 +98,12 @@ public class MainActivity extends Activity {
                 getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
                 mCustomViewCallback.onCustomViewHidden();
                 mCustomViewCallback = null;
-                if (FORCE_PORTRAIT) {
+                if (VIEW_MODE == "PORTRAIT") {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else if (VIEW_MODE == "LANDSCAPE") {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 }
             }
         });

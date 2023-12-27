@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         buildConfigField "String", "ALLOWED_DOMAIN", "\"${System.getenv('ALLOWED_DOMAIN') ?: 'google.com'}\""
-        buildConfigField "boolean", "FORCE_PORTRAIT", System.getenv("FORCE_PORTRAIT") ?: "false"
+        buildConfigField "String", "VIEW_MODE", "\"${System.getenv('VIEW_MODE') ?: 'AUTO'}\""
         resValue "string", "app_name", System.getenv('APP_NAME') ?: "My Application"
         applicationId System.getenv('APPLICATION_ID') ?: "com.webview.myapplication"
         

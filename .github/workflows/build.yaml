@@ -14,11 +14,15 @@ on:
             app_name:
                 description: 'Name of the App'
                 required: true
-            force_portrait:
-                description: 'Force Portrait Mode'
-                type: boolean
+            view_mode:
+                description: 'View Mode'
                 required: true
-                default: false
+                type: choice
+                default: 'AUTO'
+                options:
+                    - 'AUTO'
+                    - 'PORTRAIT'
+                    - 'LANDSCAPE'
 
 jobs:
     id:
@@ -84,7 +88,7 @@ jobs:
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
                   APPLICATION_ID: ${{ env.APPLICATION_ID }}
                   APP_NAME: ${{ inputs.app_name }}
-                  FORCE_PORTRAIT: ${{ inputs.force_portrait }}
+                  VIEW_MODE: ${{ inputs.view_mode }}
                   ALLOWED_DOMAIN: ${{ env.DOMAIN }}
             - name: Rename APK
               run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/webview-${{ env.DOMAIN }}.apk
@@ -102,7 +106,7 @@ jobs:
                       Restricted WebView App.
                       Domain: [${{ env.DOMAIN }}](//${{ env.DOMAIN }})
                       App Name: ${{ inputs.app_name }}
-                      Force Portrait: `${{ inputs.force_portrait }}`
+                      View Mode: ${{ inputs.view_mode }}
             - name: Get the APK URL
               run: |
                 echo "APK URL: ${{ fromJSON(steps.create_release.outputs.assets)[0].browser_download_url }}"
