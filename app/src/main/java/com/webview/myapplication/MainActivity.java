@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
     private static final String ALLOWED_DOMAIN = BuildConfig.ALLOWED_DOMAIN;
     private static final String SECOND_ALLOWED_DOMAIN = BuildConfig.SECOND_ALLOWED_DOMAIN;
-    private static final boolean BLOCK_IMAGES = BuildConfig.BLOCK_IMAGES;
+    private static final boolean BLOCK_MEDIA = BuildConfig.BLOCK_MEDIA;
     private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
     private WebView mWebView;
     private View mCustomView;
@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
         mProgressBar = findViewById(R.id.progressBar);
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        if (BLOCK_IMAGES) {
+        if (BLOCK_MEDIA) {
             webSettings.setLoadsImagesAutomatically(false);
         }
 
@@ -150,6 +150,10 @@ public class MainActivity extends Activity {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             mProgressBar.setVisibility(View.GONE);
+            
+            if (BLOCK_MEDIA) {
+                view.loadUrl("(() => document.querySelectorAll('video,source,object,embed,iframe,[type^=video]').forEach(elm => elm.remove()))()");
+            }
         }
     }
 

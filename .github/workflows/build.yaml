@@ -16,7 +16,7 @@ on:
             app_name:
                 description: 'Name of the App'
                 required: true
-            block_images:
+            block_media:
                 description: 'Block images'
                 type: boolean
                 default: false
@@ -106,7 +106,7 @@ jobs:
                   VIEW_MODE: ${{ inputs.view_mode }}
                   ALLOWED_DOMAIN: ${{ env.ALLOWED_DOMAIN }}
                   SECOND_ALLOWED_DOMAIN: ${{ env.SECOND_ALLOWED_DOMAIN }}
-                  BLOCK_IMAGES: ${{ inputs.block_images }}
+                  BLOCK_MEDIA: ${{ inputs.block_media }}
             - name: Rename APK
               run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/webview-${{ env.ALLOWED_DOMAIN }}.apk
             - name: Create Release
@@ -125,7 +125,7 @@ jobs:
                       Second Domain: [${{ env.SECOND_ALLOWED_DOMAIN }}](//${{ env.SECOND_ALLOWED_DOMAIN }})
                       App Name: ${{ inputs.app_name }}
                       View Mode: ${{ inputs.view_mode }}
-                      Block Images: ${{ inputs.block_images }}
+                      Block Images: ${{ inputs.block_media }}
             - name: Get the APK URL
               run: |
                 echo "APK URL: ${{ fromJSON(steps.create_release.outputs.assets)[0].browser_download_url }}"

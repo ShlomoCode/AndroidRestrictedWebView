@@ -19,7 +19,7 @@ android {
         buildConfigField "String", "ALLOWED_DOMAIN", "\"${System.getenv('ALLOWED_DOMAIN') ?: 'example.com'}\""
         buildConfigField "String", "SECOND_ALLOWED_DOMAIN", "\"${System.getenv('SECOND_ALLOWED_DOMAIN') ?: ''}\""
         buildConfigField "String", "VIEW_MODE", "\"${System.getenv('VIEW_MODE') ?: 'AUTO'}\""
-        buildConfigField "boolean", "BLOCK_IMAGES", "${System.getenv('BLOCK_IMAGES') ?: 'false'}"
+        buildConfigField "boolean", "BLOCK_MEDIA", "${System.getenv('BLOCK_MEDIA') ?: 'false'}"
         resValue "string", "app_name", System.getenv('APP_NAME') ?: "My Application"
         applicationId System.getenv('APPLICATION_ID') ?: "com.webview.myapplication"
         
