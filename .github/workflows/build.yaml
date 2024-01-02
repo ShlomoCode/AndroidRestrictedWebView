@@ -11,6 +11,8 @@ on:
             domain:
                 description: 'URL of the Website'
                 required: true
+            second_domain:
+                description: 'Second domain (for example files subdomain)'
             app_name:
                 description: 'Name of the App'
                 required: true
@@ -37,24 +39,33 @@ jobs:
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
-            - name: Validate domain
+            - name: Validate domains
               run: |
-                  # Remove protocol from URL if present
-                  DOMAIN="${{ inputs.domain }}"
-                  DOMAIN="${DOMAIN#http://}"
-                  DOMAIN="${DOMAIN#https://}"
+                  validate_domain() {
+                    DOMAIN="${1}"
+                    
+                    # Remove protocol from URL if present
+                    DOMAIN="${DOMAIN#http://}"
+                    DOMAIN="${DOMAIN#https://}"
+                    DOMAIN="${DOMAIN%%/*}"
+                    
+                    if ! [[ $DOMAIN =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+                      echo "Error: Invalid domain format in $DOMAIN!"
+                      exit 1
+                    fi
+                    echo $DOMAIN
+                  }
 
-                  # Remove path from URL if present
-                  DOMAIN="${DOMAIN%%/*}"
-                  
-                  # Check if the URL is a valid domain
-                  if ! [[ $DOMAIN =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
-                  echo "Error: Invalid domain format!"
-                  exit 1
+                  # Validate primary domain
+                  DOMAIN=$(validate_domain "${{ inputs.domain }}")
+                  echo "ALLOWED_DOMAIN=$DOMAIN" >> $GITHUB_ENV
+
+                  # Validate second domain if present
+                  if [ -n "${{ inputs.second_domain }}" ]; then
+                    SECOND_DOMAIN=$(validate_domain "${{ inputs.second_domain }}")
+                    echo "SECOND_ALLOWED_DOMAIN=$SECOND_DOMAIN" >> $GITHUB_ENV
                   fi
-                  
-                  # save as env variable
-                  echo "DOMAIN=$DOMAIN" >> $GITHUB_ENV
+
             - name: Validate app_name input
               run: |
                   if ! perl -e "exit 1 unless '${{ inputs.app_name }}' =~ /^[:a-zA-Zא-ת0-9 _-]+$/"; then
@@ -64,7 +75,7 @@ jobs:
             - name: Fix applicationId
               run: |
                   # remove all not-allowed characters https://developer.android.com/build/configure-app-module#set-application-id
-                  APPLICATION_ID=$(echo "${{ env.DOMAIN }}" | perl -pe 's/[^a-zA-Z0-9_.]//g')
+                  APPLICATION_ID=$(echo "${{ env.ALLOWED_DOMAIN }}" | perl -pe 's/[^a-zA-Z0-9_.]//g')
                   echo "APPLICATION_ID=com.restictedwebview.$APPLICATION_ID" >> $GITHUB_ENV                  
             - name: Set up JDK 17
               uses: actions/setup-java@v4
@@ -89,9 +100,10 @@ jobs:
                   APPLICATION_ID: ${{ env.APPLICATION_ID }}
                   APP_NAME: ${{ inputs.app_name }}
                   VIEW_MODE: ${{ inputs.view_mode }}
-                  ALLOWED_DOMAIN: ${{ env.DOMAIN }}
+                  ALLOWED_DOMAIN: ${{ env.ALLOWED_DOMAIN }}
+                  SECOND_ALLOWED_DOMAIN: ${{ env.SECOND_ALLOWED_DOMAIN }}
             - name: Rename APK
-              run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/webview-${{ env.DOMAIN }}.apk
+              run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/webview-${{ env.ALLOWED_DOMAIN }}.apk
             - name: Create Release
               id: create_release
               uses: softprops/action-gh-release@v1
@@ -99,12 +111,13 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   tag_name: v${{ github.run_id }}
-                  name: Release v${{ github.run_id }} (${{ env.DOMAIN }})
+                  name: Release v${{ github.run_id }} (${{ env.ALLOWED_DOMAIN }})
                   prerelease: true
-                  files: app/build/outputs/apk/release/webview-${{ env.DOMAIN }}.apk
+                  files: app/build/outputs/apk/release/webview-${{ env.ALLOWED_DOMAIN }}.apk
                   body: |
                       Restricted WebView App.
-                      Domain: [${{ env.DOMAIN }}](//${{ env.DOMAIN }})
+                      Domain: [${{ env.ALLOWED_DOMAIN }}](//${{ env.ALLOWED_DOMAIN }})
+                      Second Domain: [${{ env.SECOND_ALLOWED_DOMAIN }}](//${{ env.SECOND_ALLOWED_DOMAIN }})
                       App Name: ${{ inputs.app_name }}
                       View Mode: ${{ inputs.view_mode }}
             - name: Get the APK URL

@@ -31,6 +31,7 @@ import androidx.core.app.ActivityCompat;
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
     private static final String ALLOWED_DOMAIN = BuildConfig.ALLOWED_DOMAIN;
+    private static final String SECOND_ALLOWED_DOMAIN = BuildConfig.SECOND_ALLOWED_DOMAIN;
     private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
     private WebView mWebView;
     private View mCustomView;
@@ -130,12 +131,13 @@ public class MainActivity extends Activity {
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
-            if (Uri.parse(url).getHost().equals(ALLOWED_DOMAIN)) {
+            String host = Uri.parse(url).getHost();
+            if (host.equals(ALLOWED_DOMAIN) || (SECOND_ALLOWED_DOMAIN.length() > 0 && host.equals(SECOND_ALLOWED_DOMAIN))) {
                 mProgressBar.setVisibility(View.VISIBLE);
                 view.loadUrl(url);
                 return true;
             } else {
-                Toast.makeText(view.getContext(), "This URL is not allowed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
