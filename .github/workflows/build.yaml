@@ -79,7 +79,7 @@ jobs:
             - name: Fix applicationId
               run: |
                   # remove all not-allowed characters https://developer.android.com/build/configure-app-module#set-application-id
-                  APPLICATION_ID=$(echo "${{ env.ALLOWED_DOMAIN }}" | perl -pe 's/[^a-zA-Z0-9_.]//g')
+                  APPLICATION_ID=$(echo "${{ env.ALLOWED_DOMAIN }}" | perl -pe 's/[^a-zA-Z]//g' | tr '[:upper:]' '[:lower:]')
                   echo "APPLICATION_ID=com.restictedwebview.$APPLICATION_ID" >> $GITHUB_ENV                  
             - name: Set up JDK 17
               uses: actions/setup-java@v4
