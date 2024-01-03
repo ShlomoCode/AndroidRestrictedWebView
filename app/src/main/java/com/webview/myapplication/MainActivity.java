@@ -27,6 +27,10 @@ import androidx.core.content.ContextCompat;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import android.webkit.SslErrorHandler;
+import android.net.http.SslError;
+
+import java.util.Objects;
 
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
@@ -142,7 +146,7 @@ public class MainActivity extends Activity {
                 view.loadUrl(url);
                 return true;
             } else {
-                Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_LONG).show();
                 return true;
             }
         }
@@ -153,6 +157,17 @@ public class MainActivity extends Activity {
             mProgressBar.setVisibility(View.GONE);
             if (BLOCK_MEDIA) {
                 view.loadUrl("javascript: (() => { function handle(node) { if (node.tagName === 'IMG' && node.style.visibility !== 'hidden' && node.width > 32 && node.height > 32) { const blankImageUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='; const { width, height } = window.getComputedStyle(node); node.src = blankImageUrl; node.style.visibility = 'hidden'; node.style.background = 'none'; node.style.backgroundImage = `url(${blankImageUrl})`; node.style.width = width; node.style.height = height; } else if (node.tagName === 'VIDEO' || node.tagName === 'IFRAME' || ((!node.type || node.type.includes('video')) && node.tagName === 'SOURCE') || node.tagName === 'OBJECT') { node.remove(); } } document.querySelectorAll('img,video,source,object,embed,iframe,[type^=video]').forEach(handle); const observer = new MutationObserver((mutations) => mutations.forEach((mutation) => mutation.addedNodes.forEach(handle))); observer.observe(document.body, { childList: true, subtree: true }); })();");
+            }
+        }
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            handler.cancel();
+            view.loadData("<html><body><h1 style='color: grey'>SSL Error</h1></body></html>", "text/html; charset=utf-8", "UTF-8");
+            if (Objects.equals(error.getCertificate().getIssuedBy().getOName(), "NetFree")) {
+                Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של נטפרי", Toast.LENGTH_LONG).show();
+            } else if (Objects.equals(error.getCertificate().getIssuedBy().getOName(), "Netspark")) {
+                Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של אתרוג/רימון", Toast.LENGTH_LONG).show();
             }
         }
     }
