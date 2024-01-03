@@ -137,7 +137,7 @@ public class MainActivity extends Activity {
         @Override
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
             String host = Uri.parse(url).getHost();
-            if (host.equals(ALLOWED_DOMAIN) || (SECOND_ALLOWED_DOMAIN.length() > 0 && host.equals(SECOND_ALLOWED_DOMAIN))) {
+            if (host.equals(ALLOWED_DOMAIN) || host.equals(SECOND_ALLOWED_DOMAIN)) {
                 mProgressBar.setVisibility(View.VISIBLE);
                 view.loadUrl(url);
                 return true;
