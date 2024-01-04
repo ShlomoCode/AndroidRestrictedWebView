@@ -121,6 +121,7 @@ jobs:
                   tag_name: v${{ github.run_id }}
                   name: Release v${{ github.run_id }} (${{ env.PRIMARY_DOMAIN }})
                   prerelease: true
+                  draft: false
                   files: app/build/outputs/apk/release/webview-${{ env.PRIMARY_DOMAIN }}.apk
                   body: |
                       Restricted WebView App.
