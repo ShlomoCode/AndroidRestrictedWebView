@@ -29,7 +29,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import android.webkit.SslErrorHandler;
 import android.net.http.SslError;
-
+import android.webkit.WebSettings.PluginState;
 import java.util.Objects;
 
 public class MainActivity extends Activity {
@@ -80,6 +80,14 @@ public class MainActivity extends Activity {
         mProgressBar = findViewById(R.id.progressBar);
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
+        webSettings.setSupportZoom(true);
+        webSettings.setDefaultTextEncodingName("utf-8");
+        webSettings.setPluginState(PluginState.ON);
         if (BLOCK_MEDIA) {
             webSettings.setLoadsImagesAutomatically(false);
         }
