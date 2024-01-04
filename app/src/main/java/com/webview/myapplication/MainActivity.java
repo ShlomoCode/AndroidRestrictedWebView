@@ -31,11 +31,11 @@ import android.webkit.SslErrorHandler;
 import android.net.http.SslError;
 import android.webkit.WebSettings.PluginState;
 import java.util.Objects;
+import java.util.Arrays;
 
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
-    private static final String ALLOWED_DOMAIN = BuildConfig.ALLOWED_DOMAIN;
-    private static final String SECOND_ALLOWED_DOMAIN = BuildConfig.SECOND_ALLOWED_DOMAIN;
+    private static final String[] ALLOWED_DOMAINS = BuildConfig.ALLOWED_DOMAINS.split("\\,");
     private static final boolean BLOCK_MEDIA = BuildConfig.BLOCK_MEDIA;
     private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
     private WebView mWebView;
@@ -142,19 +142,31 @@ public class MainActivity extends Activity {
             dm.enqueue(request);
             Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
         });
-        mWebView.loadUrl("https://" + ALLOWED_DOMAIN);
+        mWebView.loadUrl("https://" + ALLOWED_DOMAINS[0]);
+    }
+
+    private static int countDots(String str) {
+        return str.split("\\.", -1).length - 1;
     }
 
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
             String host = Uri.parse(url).getHost();
-            if (host.equals(ALLOWED_DOMAIN) || host.equals(SECOND_ALLOWED_DOMAIN)) {
+            boolean isAllowed = false;
+            for (String domain : ALLOWED_DOMAINS) {
+                if (host.equals(domain) || (countDots(domain) == 1 && (host.equals("www." + domain) || host.equals("m." + domain)))) {
+                    isAllowed = true;
+                    break;
+                }
+            }
+
+            if (isAllowed) {
                 mProgressBar.setVisibility(View.VISIBLE);
                 view.loadUrl(url);
                 return true;
             } else {
-                Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_LONG).show();
+                Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
