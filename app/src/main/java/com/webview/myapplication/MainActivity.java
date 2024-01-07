@@ -83,9 +83,6 @@ public class MainActivity extends Activity {
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestStoragePermission();
-        }
         super.onCreate(savedInstanceState);
 
         if (VIEW_MODE == "PORTRAIT") {
@@ -181,6 +178,9 @@ public class MainActivity extends Activity {
 
         mWebView.setWebViewClient(new HelloWebViewClient());
         mWebView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestStoragePermission();
+            }
             Uri source = Uri.parse(url);
             DownloadManager.Request request = new DownloadManager.Request(source);
             String cookies = CookieManager.getInstance().getCookie(url);
@@ -193,7 +193,7 @@ public class MainActivity extends Activity {
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimeType));
             DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
             dm.enqueue(request);
-            Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Downloading File...", Toast.LENGTH_LONG).show();
         });
         mWebView.loadUrl("https://" + ALLOWED_DOMAINS[0]);
     }
