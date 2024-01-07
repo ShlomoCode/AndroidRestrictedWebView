@@ -32,6 +32,8 @@ import android.net.http.SslError;
 import android.webkit.WebSettings.PluginState;
 import java.util.Objects;
 import java.util.Arrays;
+import android.content.Intent;
+import android.webkit.ValueCallback;
 
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
@@ -57,6 +59,25 @@ public class MainActivity extends Activity {
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
         }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == FILECHOOSER_RESULTCODE) {
+            if (null == mUploadMessage && null == mFilePathCallback) return;
+            Uri result = intent == null || resultCode != RESULT_OK ? null : intent.getData();
+            if (mFilePathCallback != null) {
+                mFilePathCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+                mFilePathCallback = null;
+            } else if (mUploadMessage != null) {
+                mUploadMessage.onReceiveValue(result);
+                mUploadMessage = null;
+            }
+        }
+    }
+
+    private ValueCallback<Uri> mUploadMessage;
+    private ValueCallback<Uri[]> mFilePathCallback;
+    private final static int FILECHOOSER_RESULTCODE = 1;
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
@@ -123,6 +144,38 @@ public class MainActivity extends Activity {
                 } else {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 }
+            }
+
+            @Override
+            public boolean onShowFileChooser(
+                WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                mFilePathCallback = filePathCallback;
+
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+                if (fileChooserParams.getAcceptTypes().length > 0 && !Objects.equals(fileChooserParams.getAcceptTypes()[0], "")) {
+                    intent.setType(fileChooserParams.getAcceptTypes()[0]);
+                } else {
+                    intent.setType("*/*");
+                }
+
+                startActivityForResult(intent, FILECHOOSER_RESULTCODE);
+                return true;
+            }
+
+            // support android < 5.0
+            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
+                mUploadMessage = uploadMsg;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                
+                if (acceptType != null && !acceptType.isEmpty()) {
+                    i.setType(acceptType);
+                } else {
+                    i.setType("*/*");
+                }
+                startActivityForResult(Intent.createChooser(i, "Choice File"), FILECHOOSER_RESULTCODE);
             }
         });
 
