@@ -78,7 +78,7 @@ jobs:
 
             - name: Validate app_name input
               run: |
-                  if ! perl -e "exit 1 unless '${{ inputs.app_name }}' =~ /^[:a-zA-Zא-ת0-9 _.-]+$/"; then
+                  if ! perl -e "exit 1 unless '${{ inputs.app_name }}' =~ /^[:a-zA-Zא-ת0-9 \"_.-]+$/"; then
                     echo "Error: Invalid app_name format!"
                     exit 1
                   fi
