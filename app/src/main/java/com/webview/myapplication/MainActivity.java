@@ -107,6 +107,7 @@ public class MainActivity extends Activity {
         webSettings.setSupportZoom(true);
         webSettings.setDefaultTextEncodingName("utf-8");
         webSettings.setPluginState(PluginState.ON);
+        webSettings.setAllowFileAccess(false);
         if (BLOCK_MEDIA) {
             webSettings.setLoadsImagesAutomatically(false);
         }
