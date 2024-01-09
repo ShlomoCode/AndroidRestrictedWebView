@@ -17,6 +17,7 @@ android {
 
     defaultConfig {
         buildConfigField "String", "ALLOWED_DOMAINS", "\"${System.getenv('ALLOWED_DOMAINS') ?: 'example.com'}\""
+        buildConfigField "String", "STARTUP_URL", "\"${System.getenv('STARTUP_URL') ?: '' }\""
         buildConfigField "String", "VIEW_MODE", "\"${System.getenv('VIEW_MODE') ?: 'AUTO'}\""
         buildConfigField "boolean", "BLOCK_MEDIA", "${System.getenv('BLOCK_MEDIA') ?: 'false'}"
         resValue "string", "app_name", System.getenv('APP_NAME') ?: "My Application"

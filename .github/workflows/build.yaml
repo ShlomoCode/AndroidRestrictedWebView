@@ -31,6 +31,8 @@ on:
                     - 'LANDSCAPE'
             icon_url:
                 description: 'Icon URL'
+            startup_url:
+                description: 'Start URL'
 
 jobs:
     id:
@@ -119,6 +121,7 @@ jobs:
                   APPLICATION_ID: ${{ env.APPLICATION_ID }}
                   APP_NAME: ${{ inputs.app_name }}
                   VIEW_MODE: ${{ inputs.view_mode }}
+                  STARTUP_URL: ${{ inputs.startup_url }}
                   ALLOWED_DOMAINS: ${{ env.ALLOWED_DOMAINS }}
                   BLOCK_MEDIA: ${{ inputs.block_media }}
             - name: Rename APK

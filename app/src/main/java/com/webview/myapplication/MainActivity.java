@@ -38,6 +38,7 @@ import android.webkit.ValueCallback;
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
     private static final String[] ALLOWED_DOMAINS = BuildConfig.ALLOWED_DOMAINS.split("\\,");
+    private static final String STARTUP_URL = BuildConfig.STARTUP_URL;
     private static final boolean BLOCK_MEDIA = BuildConfig.BLOCK_MEDIA;
     private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
     private WebView mWebView;
@@ -195,7 +196,7 @@ public class MainActivity extends Activity {
             dm.enqueue(request);
             Toast.makeText(getApplicationContext(), "Downloading File...", Toast.LENGTH_LONG).show();
         });
-        mWebView.loadUrl("https://" + ALLOWED_DOMAINS[0]);
+        mWebView.loadUrl(STARTUP_URL.isEmpty() ? "https://" + ALLOWED_DOMAINS[0] : STARTUP_URL);
     }
 
     private static int countDots(String str) {
@@ -207,6 +208,9 @@ public class MainActivity extends Activity {
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
             String host = Uri.parse(url).getHost();
             boolean isAllowed = false;
+            if (!STARTUP_URL.isEmpty() && url.equals(STARTUP_URL)) {
+                isAllowed = true;
+            }
             for (String domain : ALLOWED_DOMAINS) {
                 if (host.equals(domain) || (countDots(domain) == 1 && (host.equals("www." + domain) || host.equals("m." + domain)))) {
                     isAllowed = true;
