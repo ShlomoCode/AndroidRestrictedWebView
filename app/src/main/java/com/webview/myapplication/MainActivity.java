@@ -199,11 +199,7 @@ public class MainActivity extends Activity {
         });
         mWebView.loadUrl(STARTUP_URL.isEmpty() ? "https://" + ALLOWED_DOMAINS[0] : STARTUP_URL);
     }
-
-    private static int countDots(String str) {
-        return str.split("\\.", -1).length - 1;
-    }
-
+    
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
@@ -213,7 +209,7 @@ public class MainActivity extends Activity {
                 isAllowed = true;
             }
             for (String domain : ALLOWED_DOMAINS) {
-                if (host.equals(domain) || (countDots(domain) == 1 && (host.equals("www." + domain) || host.equals("m." + domain)))) {
+                if (host.equals(domain) || host.equals("www." + domain) || host.equals("m." + domain)) {
                     isAllowed = true;
                     break;
                 }
