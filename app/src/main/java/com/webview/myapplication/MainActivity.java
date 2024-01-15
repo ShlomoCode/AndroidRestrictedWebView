@@ -276,11 +276,26 @@ public class MainActivity extends Activity {
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
             String host = Uri.parse(url).getHost();
             boolean isAllowed = false;
+
+            if (url.startsWith("tel:")) {
+                Intent tel = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
+                startActivity(tel);
+                return true;
+            }
+
+            if (url.contains("mailto:")){
+                   view.getContext().startActivity(
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            }
+
+            if (host == null) {
+                isAllowed = true; // mailto: links
+            }
             if (!STARTUP_URL.isEmpty() && url.equals(STARTUP_URL)) {
                 isAllowed = true;
             }
             for (String domain : ALLOWED_DOMAINS) {
-                if (host.equals(domain) || host.equals("www." + domain) || host.equals("m." + domain)) {
+                if (host == null || host.equals(domain) || host.equals("www." + domain) || host.equals("m." + domain)) {
                     isAllowed = true;
                     break;
                 }
