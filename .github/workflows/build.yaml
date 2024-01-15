@@ -37,7 +37,10 @@ on:
                 description: 'Icon URL'
             startup_url:
                 description: 'Start URL'
-
+            no_ssl:
+                description: 'No SSL - Not recommended!!'
+                type: boolean
+                default: false
 jobs:
     id:
       # https://stackoverflow.com/a/73837663
@@ -131,6 +134,7 @@ jobs:
                   ALLOWED_DOMAINS: ${{ env.ALLOWED_DOMAINS }}
                   BLOCK_MEDIA: ${{ inputs.block_media }}
                   BLOCK_ADS: ${{ inputs.block_ads }}
+                  NO_SSL: ${{ inputs.no_ssl }}
             - name: Rename APK
               run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/webview-${{ env.PRIMARY_DOMAIN }}.apk
             - name: Create Release
@@ -148,6 +152,7 @@ jobs:
                       Restricted WebView App.
                       Domain: [${{ env.PRIMARY_DOMAIN }}](//${{ env.PRIMARY_DOMAIN }})
                       Second Domain: [${{ env.SECOND_DOMAIN }}](//${{ env.SECOND_DOMAIN }})
+                      No Secured: ${{ inputs.no_ssl }}
                       App Name: ${{ inputs.app_name }}
                       View Mode: ${{ inputs.view_mode }}
                       Block Media: ${{ inputs.block_media }}

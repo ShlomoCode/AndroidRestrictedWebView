@@ -108,9 +108,10 @@ public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
     private static final String[] ALLOWED_DOMAINS = BuildConfig.ALLOWED_DOMAINS.split(",");
     private static final String STARTUP_URL = BuildConfig.STARTUP_URL;
+    private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
     private static final boolean BLOCK_MEDIA = BuildConfig.BLOCK_MEDIA;
     private static final boolean BLOCK_ADS = BuildConfig.BLOCK_ADS;
-    private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
+    private static final boolean NO_SSL = BuildConfig.NO_SSL;
     private WebView mWebView;
     private View mCustomView;
     private CustomViewCallback mCustomViewCallback;
@@ -332,12 +333,17 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-            handler.cancel();
-            view.loadData("<html><body><h1 style='color: grey'>SSL Error</h1></body></html>", "text/html; charset=utf-8", "UTF-8");
-            if (Objects.equals(error.getCertificate().getIssuedBy().getOName(), "NetFree")) {
-                Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של נטפרי", Toast.LENGTH_LONG).show();
-            } else if (Objects.equals(error.getCertificate().getIssuedBy().getOName(), "Netspark")) {
-                Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של אתרוג/רימון", Toast.LENGTH_LONG).show();
+            String issuerName = error.getCertificate().getIssuedBy().getOName();
+            if (NO_SSL && (Objects.equals(issuerName, "NetFree") || Objects.equals(issuerName, "Netspark"))) {
+                handler.proceed();
+            } else {
+                handler.cancel();
+                view.loadData("<html><body><h1 style='color: grey'>SSL Error</h1></body></html>", "text/html; charset=utf-8", "UTF-8");
+                if (Objects.equals(issuerName, "NetFree")) {
+                    Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של נטפרי", Toast.LENGTH_LONG).show();
+                } else if (Objects.equals(issuerName, "Netspark")) {
+                    Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של אתרוג/רימון", Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
