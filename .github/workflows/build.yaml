@@ -103,7 +103,7 @@ jobs:
                   npm install && node create_mipmap_images.js "${{ inputs.icon_url }}"
                 fi
             - name: Download AdBlock List
-              run: curl "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=1&mimetype=plaintext" -o app/src/main/assets/adblock.txt
+              run: curl "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=1&mimetype=plaintext" -o app/src/main/assets/adblock.txt --create-dirs
             - name: Set up JDK 17
               uses: actions/setup-java@v4
               with:
