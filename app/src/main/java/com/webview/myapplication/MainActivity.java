@@ -6,40 +6,110 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.SslErrorHandler;
 import android.webkit.URLUtil;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebChromeClient.CustomViewCallback;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
+import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.content.pm.PackageManager;
-import androidx.core.content.ContextCompat;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
-import android.webkit.SslErrorHandler;
-import android.net.http.SslError;
-import android.webkit.WebSettings.PluginState;
-import java.util.Objects;
+import androidx.core.content.ContextCompat;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
-import android.content.Intent;
-import android.webkit.ValueCallback;
+import java.util.HashSet;
+import java.util.Objects;
+
+class AdBlockerUtil {
+    private final HashSet<String> adHosts = new HashSet<>();
+
+    private static AdBlockerUtil mInstance;
+
+    public static AdBlockerUtil getInstance() {
+        if (mInstance == null) {
+            mInstance = new AdBlockerUtil();
+        }
+        return mInstance;
+    }
+
+    public void initialize(Context context) {
+        try {
+            InputStream inputStream = context.getAssets().open("adblock.txt");
+            loadHostsFromInputStream(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isAd(String url) {
+        if (url == null) {
+            return false;
+        }
+
+        String requestHost = Uri.parse(url).getHost();
+        
+        if (requestHost == null) {
+            return false;
+        }
+
+        if (adHosts.contains(requestHost)) {
+            return true;
+        }
+        
+        String[] subDomains = requestHost.split("\\.");
+
+        for (int i = subDomains.length - 1; i >= 0; i--) {
+            String domain = String.join(".", Arrays.copyOfRange(subDomains, i, subDomains.length));
+
+            if (adHosts.contains(domain)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void loadHostsFromInputStream(InputStream inputStream) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                adHosts.add(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
 
 public class MainActivity extends Activity {
     private final int STORAGE_PERMISSION_CODE = 1;
-    private static final String[] ALLOWED_DOMAINS = BuildConfig.ALLOWED_DOMAINS.split("\\,");
+    private static final String[] ALLOWED_DOMAINS = BuildConfig.ALLOWED_DOMAINS.split(",");
     private static final String STARTUP_URL = BuildConfig.STARTUP_URL;
     private static final boolean BLOCK_MEDIA = BuildConfig.BLOCK_MEDIA;
+    private static final boolean BLOCK_ADS = BuildConfig.BLOCK_ADS;
     private static final String VIEW_MODE = BuildConfig.VIEW_MODE;
     private WebView mWebView;
     private View mCustomView;
@@ -85,7 +155,8 @@ public class MainActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        AdBlockerUtil adBlockerUtil = AdBlockerUtil.getInstance();
+        adBlockerUtil.initialize(this);
         if (VIEW_MODE == "PORTRAIT") {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else if (VIEW_MODE == "LANDSCAPE") {
@@ -222,6 +293,16 @@ public class MainActivity extends Activity {
             } else {
                 Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_SHORT).show();
                 return true;
+            }
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+            if (BLOCK_ADS && AdBlockerUtil.getInstance().isAd(url)) {
+                WebResourceResponse emptyResponse = new WebResourceResponse("text/plain", "utf-8", new ByteArrayInputStream("".getBytes()));
+                return emptyResponse;
+            } else {
+                return super.shouldInterceptRequest(view, url);
             }
         }
 

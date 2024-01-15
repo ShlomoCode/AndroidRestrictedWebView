@@ -20,6 +20,10 @@ on:
                 description: 'Block images'
                 type: boolean
                 default: false
+            block_ads:
+                description: 'Block ads'
+                type: boolean
+                default: true
             view_mode:
                 description: 'View Mode'
                 required: true
@@ -98,6 +102,8 @@ jobs:
                 if [ -n "${{ inputs.icon_url }}" ]; then
                   npm install && node create_mipmap_images.js "${{ inputs.icon_url }}"
                 fi
+            - name: Download AdBlock List
+              run: curl "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=plain&showintro=1&mimetype=plaintext" -o app/src/main/assets/adblock.txt
             - name: Set up JDK 17
               uses: actions/setup-java@v4
               with:
@@ -124,6 +130,7 @@ jobs:
                   STARTUP_URL: ${{ inputs.startup_url }}
                   ALLOWED_DOMAINS: ${{ env.ALLOWED_DOMAINS }}
                   BLOCK_MEDIA: ${{ inputs.block_media }}
+                  BLOCK_ADS: ${{ inputs.block_ads }}
             - name: Rename APK
               run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/webview-${{ env.PRIMARY_DOMAIN }}.apk
             - name: Create Release
@@ -144,6 +151,7 @@ jobs:
                       App Name: ${{ inputs.app_name }}
                       View Mode: ${{ inputs.view_mode }}
                       Block Media: ${{ inputs.block_media }}
+                      Block Ads: ${{ inputs.block_ads }}
                       Custom Icon: ${{ inputs.icon_url }}
             - name: Get the APK URL
               run: |
