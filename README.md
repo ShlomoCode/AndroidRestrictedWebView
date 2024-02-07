@@ -3,7 +3,7 @@
 The Android Restricted WebView is an Android application template that allows you to display a specific website using a WebView while restricting access to other sites. If the application attempts to load a URL other than the allowed site, an error message "This URL is not allowed" will be displayed.
 
 ## Configuration
-in `app/build.gradle` file.
+In the file [`app/build.gradle`](./app/build.gradle) (editing the file or using env variables).
 
 recompile and redeploy the application for the change to take effect.
 
