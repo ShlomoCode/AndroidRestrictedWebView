@@ -2,9 +2,32 @@ plugins {
     id 'com.android.application'
 }
 
+def ALLOWED_DOMAINS = System.getenv('ALLOWED_DOMAINS') ?: 'example.com'
+
+static def generateIntentFilterData(allowedDomains) {
+    def intentHosts = []
+    def startupUrl = System.getenv('STARTUP_URL')
+
+    if (startupUrl) {
+        intentHosts << new URI(startupUrl).getHost()
+    } else {
+        def domains = allowedDomains.split(',')
+        for (int i = 0; i < Math.min(domains.size(), 10); i++) {
+            intentHosts << domains[i]
+        }
+    }
+
+    def intentFilterData = ''
+    intentHosts.each { host ->
+        intentFilterData += """
+            <data android:host="${host}" android:scheme="https" />
+        """
+    }
+    return intentFilterData
+}
 
 android {
-   signingConfigs {
+    signingConfigs {
         release {
             storeFile = file("keystore/android_keystore.jks")
             storePassword System.getenv("SIGNING_STORE_PASSWORD")
@@ -16,15 +39,17 @@ android {
     compileSdkVersion 34
 
     defaultConfig {
-        buildConfigField "String", "ALLOWED_DOMAINS", "\"${System.getenv('ALLOWED_DOMAINS') ?: 'example.com'}\""
-        buildConfigField "String", "STARTUP_URL", "\"${System.getenv('STARTUP_URL') ?: '' }\""
+        buildConfigField "String", "ALLOWED_DOMAINS", "\"${ALLOWED_DOMAINS}\""
+        buildConfigField "String", "STARTUP_URL", "\"${System.getenv('STARTUP_URL') ?: ''}\""
         buildConfigField "String", "VIEW_MODE", "\"${System.getenv('VIEW_MODE') ?: 'AUTO'}\""
         buildConfigField "boolean", "BLOCK_MEDIA", "${System.getenv('BLOCK_MEDIA') ?: 'false'}"
-        buildConfigField "boolean", "BLOCK_ADS", "${System.getenv('BLOCK_ADS') ?: 'true'}"
+        buildConfigField "boolean", "BLOCK_ADS", "${System.getenv('BLOCK_ADS') ?: 'false'}"
         buildConfigField "boolean", "NO_SSL", "${System.getenv('NO_SSL') ?: 'false'}"
         resValue "string", "app_name", System.getenv('APP_NAME') ?: "My Application"
         applicationId System.getenv('APPLICATION_ID') ?: "com.webview.myapplication"
         
+        manifestPlaceholders = ["intentFilterData": generateIntentFilterData(ALLOWED_DOMAINS)]
+
         minSdkVersion 16
         targetSdkVersion 34
         versionCode 1
