@@ -334,7 +334,7 @@ public class MainActivity extends Activity {
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             String issuerName = error.getCertificate().getIssuedBy().getOName();
-            if (NO_SSL && (Objects.equals(issuerName, "NetFree") || Objects.equals(issuerName, "Netspark"))) {
+            if (NO_SSL) {
                 handler.proceed();
             } else {
                 handler.cancel();
