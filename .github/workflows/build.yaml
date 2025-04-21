@@ -11,8 +11,8 @@ on:
             domain:
                 description: 'URL of the Website'
                 required: true
-            second_domain:
-                description: 'Second domain (for example files subdomain)'
+            additional_domains:
+                description: 'Additional domains (separated by commas)'
             app_name:
                 description: 'Name of the App'
                 required: true
@@ -76,11 +76,16 @@ jobs:
                   echo "PRIMARY_DOMAIN=$DOMAIN" >> $GITHUB_ENV
                   ALLOWED_DOMAINS="$DOMAIN"
 
-                  # Validate and add second domain if present
-                  if [ -n "${{ inputs.second_domain }}" ]; then
-                    SECOND_DOMAIN=$(validate_domain "${{ inputs.second_domain }}")
-                    echo "SECOND_DOMAIN=$SECOND_DOMAIN" >> $GITHUB_ENV
-                    ALLOWED_DOMAINS="$ALLOWED_DOMAINS,$SECOND_DOMAIN"
+                  # Validate and add additional domains if present
+                  if [ -n "${{ inputs.additional_domains }}" ]; then
+                    # Split by comma and process each domain
+                    IFS=',' read -ra ADDITIONAL_DOMAINS <<< "${{ inputs.additional_domains }}"
+                    for DOMAIN_TO_ADD in "${ADDITIONAL_DOMAINS[@]}"; do
+                      if [ -n "$DOMAIN_TO_ADD" ]; then
+                        VALIDATED_DOMAIN=$(validate_domain "$DOMAIN_TO_ADD")
+                        ALLOWED_DOMAINS="$ALLOWED_DOMAINS,$VALIDATED_DOMAIN"
+                      fi
+                    done
                   fi
 
                   echo "ALLOWED_DOMAINS=$ALLOWED_DOMAINS" >> $GITHUB_ENV
@@ -151,7 +156,7 @@ jobs:
                   body: |
                       Restricted WebView App.
                       Domain: [${{ env.PRIMARY_DOMAIN }}](//${{ env.PRIMARY_DOMAIN }})
-                      Second Domain: [${{ env.SECOND_DOMAIN }}](//${{ env.SECOND_DOMAIN }})
+                      Additional Domains: ${{ inputs.additional_domains }}
                       No Secured: ${{ inputs.no_ssl }}
                       App Name: ${{ inputs.app_name }}
                       View Mode: ${{ inputs.view_mode }}
