@@ -11,11 +11,11 @@ const sizes = {
 
 async function main(imageUrl) {
     const image = await Jimp.read(imageUrl);
-    image.resize(512, 512).write('app/src/main/ic_launcher-playstore.png');
+    image.resize({ w: 512, h: 512 }).write('app/src/main/ic_launcher-playstore.png');
     for (const [sizeName, sizePixels] of Object.entries(sizes)) {
         const launcherPath = `app/src/main/res/mipmap-${sizeName}/ic_launcher.png`;
         const roundPath = `app/src/main/res/mipmap-${sizeName}/ic_launcher_round.png`;
-        image.resize(sizePixels, sizePixels).write(launcherPath);
+        image.resize({ w: sizePixels, h: sizePixels }).write(launcherPath);
         image.circle().write(roundPath);
     }
 }
