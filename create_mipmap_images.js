@@ -1,4 +1,4 @@
-const Jimp = require('jimp');
+const { Jimp } = require('jimp');
 
 const sizes = {
     xxxhdpi: 192,
