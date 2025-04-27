@@ -138,11 +138,7 @@ public class MainActivity extends Activity {
             if (null == mUploadMessage && null == mFilePathCallback) return;
             Uri result = intent == null || resultCode != RESULT_OK ? null : intent.getData();
             if (mFilePathCallback != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    mFilePathCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
-                } else {
-                    mFilePathCallback.onReceiveValue(result != null ? new Uri[]{result} : null);
-                }
+                mFilePathCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
                 mFilePathCallback = null;
             } else if (mUploadMessage != null) {
                 mUploadMessage.onReceiveValue(result);
@@ -162,9 +158,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         AdBlockerUtil adBlockerUtil = AdBlockerUtil.getInstance();
         adBlockerUtil.initialize(this);
-        if (VIEW_MODE.equals("PORTRAIT")) {
+        if (VIEW_MODE == "PORTRAIT") {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else if (VIEW_MODE.equals("LANDSCAPE")) {
+        } else if (VIEW_MODE == "LANDSCAPE") {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -184,7 +180,6 @@ public class MainActivity extends Activity {
         webSettings.setDefaultTextEncodingName("utf-8");
         webSettings.setPluginState(PluginState.ON);
         webSettings.setAllowFileAccess(false);
-        webSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36");
         if (BLOCK_MEDIA) {
             webSettings.setLoadsImagesAutomatically(false);
         }
@@ -213,9 +208,9 @@ public class MainActivity extends Activity {
                 getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
                 mCustomViewCallback.onCustomViewHidden();
                 mCustomViewCallback = null;
-                if (VIEW_MODE.equals("PORTRAIT")) {
+                if (VIEW_MODE == "PORTRAIT") {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else if (VIEW_MODE.equals("LANDSCAPE")) {
+                } else if (VIEW_MODE == "LANDSCAPE") {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 } else {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -356,9 +351,7 @@ public class MainActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (mCustomView != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                mWebView.getWebChromeClient().onHideCustomView();
-            }
+            mWebView.getWebChromeClient().onHideCustomView();
         } else if (mWebView.canGoBack()) {
             mWebView.goBack();
         } else {
