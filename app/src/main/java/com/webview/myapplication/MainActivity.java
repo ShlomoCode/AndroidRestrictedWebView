@@ -275,41 +275,22 @@ public class MainActivity extends Activity {
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
-            String host = Uri.parse(url).getHost();
-            boolean isAllowed = false;
-
             if (url.startsWith("tel:")) {
                 Intent tel = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
                 startActivity(tel);
                 return true;
             }
 
-            if (url.contains("mailto:")){
-                   view.getContext().startActivity(
+            if (url.contains("mailto:")) {
+                view.getContext().startActivity(
                     new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-            }
-
-            if (host == null) {
-                isAllowed = true; // mailto: links
-            }
-            if (!STARTUP_URL.isEmpty() && url.equals(STARTUP_URL)) {
-                isAllowed = true;
-            }
-            for (String domain : ALLOWED_DOMAINS) {
-                if (host == null || host.equals(domain) || host.equals("www." + domain) || host.equals("m." + domain)) {
-                    isAllowed = true;
-                    break;
-                }
-            }
-
-            if (isAllowed) {
-                mProgressBar.setVisibility(View.VISIBLE);
-                view.loadUrl(url);
-                return true;
-            } else {
-                Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_SHORT).show();
                 return true;
             }
+
+            // Allow navigation to all URLs
+            mProgressBar.setVisibility(View.VISIBLE);
+            view.loadUrl(url);
+            return true;
         }
 
         @Override
