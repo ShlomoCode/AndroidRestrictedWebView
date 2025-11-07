@@ -12,26 +12,63 @@ This app is configured to work **ONLY with NetFree** internet filtering. The app
 ## How to Add NetFree CA Certificates
 
 1. Obtain the NetFree CA certificate files in `.crt` format (PEM or DER encoded)
-2. Place the `.crt` files directly in this directory:
+
+2. **IMPORTANT - File Naming**: Android resource files cannot start with numbers or contain dots (except the extension).
+
+   **Rename these files BEFORE uploading**:
+   - `018.crt` → `netfree_018.crt`
+   - `019.crt` → `netfree_019.crt`
+   - `099.crt` → `netfree_099.crt`
+
+   **Also replace hyphens with underscores**:
+   - `ib-itc.crt` → `ib_itc.crt`
+   - `ib-partner.crt` → `ib_partner.crt`
+   - `ib-spotnet.crt` → `ib_spotnet.crt`
+   - `hadran-vpn.crt` → `hadran_vpn.crt`
+   - `kosher-sim-cellcom.crt` → `kosher_sim_cellcom.crt`
+   - `kosher-sim.crt` → `kosher_sim.crt`
+   - `ksim-itc.crt` → `ksim_itc.crt`
+   - `ksim-partner.crt` → `ksim_partner.crt`
+   - `ksim-pele.crt` → `ksim_pele.crt`
+   - `netfree-anywhere.crt` → `netfree_anywhere.crt`
+   - `sim-kasher-triple-c.crt` → `sim_kasher_triple_c.crt`
+
+3. Place the **renamed** `.crt` files directly in this directory:
    ```
    app/src/main/res/raw/
    ```
 
-3. Update the network security configuration:
-   - Open: `app/src/main/res/xml/network_security_config.xml`
-   - Add certificate references (without the `.crt` extension):
-   ```xml
-   <trust-anchors>
-       <certificates src="@raw/netfree_ca" />
-       <!-- Add more certificates if needed -->
-   </trust-anchors>
-   ```
+4. The network security configuration has already been updated in:
+   `app/src/main/res/xml/network_security_config.xml`
 
-## Example
+   All 20 NetFree certificates are pre-configured!
 
-If you have a certificate file named `netfree_ca.crt`:
-1. Place it in: `app/src/main/res/raw/netfree_ca.crt`
-2. Reference it as: `<certificates src="@raw/netfree_ca" />`
+## Complete File List (After Renaming)
+
+Place these files in `app/src/main/res/raw/`:
+
+```
+netfree_018.crt
+netfree_019.crt
+netfree_099.crt
+amitnet.crt
+bezeq.crt
+hadran_vpn.crt
+hot.crt
+ib_itc.crt
+ib_partner.crt
+ib_spotnet.crt
+itc.crt
+kosher_sim.crt
+kosher_sim_cellcom.crt
+ksim_itc.crt
+ksim_partner.crt
+ksim_pele.crt
+netfree_anywhere.crt
+sim_kasher_triple_c.crt
+x2one.crt
+yossi.crt
+```
 
 ## Important Notes
 

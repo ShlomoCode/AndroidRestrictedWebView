@@ -9,16 +9,45 @@
     IMPORTANT: Place NetFree CA certificate files (.crt format) in:
     app/src/main/res/raw/
 
-    Then reference them below without the .crt extension.
-    For example, if you have "netfree_ca.crt", reference it as:
-    <certificates src="@raw/netfree_ca" />
+    NAMING REQUIREMENT: Android does not allow resource files to start with numbers!
+    Rename these files when uploading:
+    - 018.crt     → netfree_018.crt
+    - 019.crt     → netfree_019.crt
+    - 099.crt     → netfree_099.crt
 -->
 <network-security-config xmlns:tools="http://schemas.android.com/tools">
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
-            <!-- Add your NetFree CA certificates here -->
-            <!-- Example: <certificates src="@raw/netfree_ca" /> -->
-            <!-- You can add multiple certificate files, one per line -->
+            <!-- NetFree CA Certificates -->
+            <!-- Files starting with numbers must be renamed with 'netfree_' prefix -->
+            <certificates src="@raw/netfree_018" />
+            <certificates src="@raw/netfree_019" />
+            <certificates src="@raw/netfree_099" />
+
+            <!-- ISP and Provider Certificates -->
+            <certificates src="@raw/amitnet" />
+            <certificates src="@raw/bezeq" />
+            <certificates src="@raw/hot" />
+            <certificates src="@raw/itc" />
+            <certificates src="@raw/x2one" />
+
+            <!-- IB (Israel Broadband) Certificates -->
+            <certificates src="@raw/ib_itc" />
+            <certificates src="@raw/ib_partner" />
+            <certificates src="@raw/ib_spotnet" />
+
+            <!-- Kosher SIM Certificates -->
+            <certificates src="@raw/kosher_sim" />
+            <certificates src="@raw/kosher_sim_cellcom" />
+            <certificates src="@raw/ksim_itc" />
+            <certificates src="@raw/ksim_partner" />
+            <certificates src="@raw/ksim_pele" />
+            <certificates src="@raw/sim_kasher_triple_c" />
+
+            <!-- Other NetFree Services -->
+            <certificates src="@raw/hadran_vpn" />
+            <certificates src="@raw/netfree_anywhere" />
+            <certificates src="@raw/yossi" />
         </trust-anchors>
     </base-config>
 </network-security-config>
