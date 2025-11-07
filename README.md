@@ -13,11 +13,16 @@ The app implements strict security measures:
 
 ### Setting Up NetFree Certificates
 
-1. Obtain NetFree CA certificate files (`.crt` format)
-2. Place them in: `app/src/main/res/raw/`
-3. Reference them in: `app/src/main/res/xml/network_security_config.xml`
+**Quick Start: [📋 NETFREE_SETUP.md](./NETFREE_SETUP.md)** - Complete setup guide in Hebrew
 
-For detailed instructions, see: [app/src/main/res/raw/README.md](./app/src/main/res/raw/README.md)
+The app is pre-configured for all 20 NetFree CA certificates. You only need to:
+1. Rename certificate files (script provided: `rename_certificates.sh`)
+2. Upload them to `app/src/main/res/raw/`
+3. Build the app
+
+For detailed instructions, see:
+- [NETFREE_SETUP.md](./NETFREE_SETUP.md) - Step-by-step guide (Hebrew)
+- [app/src/main/res/raw/README.md](./app/src/main/res/raw/README.md) - Technical details
 
 ## Configuration
 In the file [`app/build.gradle`](./app/build.gradle) (editing the file or using env variables).
