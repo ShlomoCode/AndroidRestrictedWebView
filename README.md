@@ -2,6 +2,23 @@
 
 The Android Restricted WebView is an Android application template that allows you to display a specific website using a WebView while restricting access to other sites. If the application attempts to load a URL other than the allowed site, an error message "This URL is not allowed" will be displayed.
 
+## NetFree Support
+
+**This app is configured to work ONLY with NetFree internet filtering.**
+
+The app implements strict security measures:
+- ✅ **HTTPS-Only**: All HTTP traffic is blocked
+- ✅ **Certificate Pinning**: Only trusts NetFree CA certificates
+- ✅ **No System Certificates**: Built-in Android certificates are not trusted
+
+### Setting Up NetFree Certificates
+
+1. Obtain NetFree CA certificate files (`.crt` format)
+2. Place them in: `app/src/main/res/raw/`
+3. Reference them in: `app/src/main/res/xml/network_security_config.xml`
+
+For detailed instructions, see: [app/src/main/res/raw/README.md](./app/src/main/res/raw/README.md)
+
 ## Configuration
 In the file [`app/build.gradle`](./app/build.gradle) (editing the file or using env variables).
 

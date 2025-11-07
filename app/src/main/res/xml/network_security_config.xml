@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Configuration for NetFree
+    This configuration:
+    1. Blocks all HTTP traffic (only HTTPS allowed)
+    2. Uses certificate pinning - trusts ONLY NetFree CA certificates
+    3. Does NOT trust system or user certificates
+
+    IMPORTANT: Place NetFree CA certificate files (.crt format) in:
+    app/src/main/res/raw/
+
+    Then reference them below without the .crt extension.
+    For example, if you have "netfree_ca.crt", reference it as:
+    <certificates src="@raw/netfree_ca" />
+-->
 <network-security-config xmlns:tools="http://schemas.android.com/tools">
-    <base-config cleartextTrafficPermitted="true" tools:ignore="InsecureBaseConfiguration">
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
-            <certificates src="system" />
-            <certificates src="user" tools:ignore="AcceptsUserCertificates" />
+            <!-- Add your NetFree CA certificates here -->
+            <!-- Example: <certificates src="@raw/netfree_ca" /> -->
+            <!-- You can add multiple certificate files, one per line -->
         </trust-anchors>
     </base-config>
 </network-security-config>
