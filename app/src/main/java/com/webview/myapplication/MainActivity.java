@@ -314,17 +314,11 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-            String issuerName = error.getCertificate().getIssuedBy().getOName();
             if (NO_SSL) {
                 handler.proceed();
             } else {
                 handler.cancel();
-                view.loadData("<html><body><h1 style='color: grey'>SSL Error</h1></body></html>", "text/html; charset=utf-8", "UTF-8");
-                if (Objects.equals(issuerName, "NetFree")) {
-                    Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של נטפרי", Toast.LENGTH_LONG).show();
-                } else if (Objects.equals(issuerName, "Netspark")) {
-                    Toast.makeText(view.getContext(), "טיפ: נראה שלא מותקנת תעודת אבטחה של אתרוג/רימון", Toast.LENGTH_LONG).show();
-                }
+                view.loadData("<html dir='rtl'><head><meta charset='utf-8'></head><body style='display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;'><div style='text-align: center; padding: 20px;'><h1 style='font-size: 48px; color: #333; margin: 0;'>אופס!</h1><p style='font-size: 32px; color: #666; margin-top: 20px;'>דפדפן זה עובד בחיבור נטפרי בלבד</p></div></body></html>", "text/html; charset=utf-8", "UTF-8");
             }
         }
     }
