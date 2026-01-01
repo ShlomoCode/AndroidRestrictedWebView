@@ -112,6 +112,9 @@ public class MainActivity extends Activity {
     private static final boolean BLOCK_MEDIA = BuildConfig.BLOCK_MEDIA;
     private static final boolean BLOCK_ADS = BuildConfig.BLOCK_ADS;
     private static final boolean NO_SSL = BuildConfig.NO_SSL;
+    private static final boolean ALLOW_GOOGLE_LOGIN = BuildConfig.ALLOW_GOOGLE_LOGIN;
+    private static final String CHROME_USER_AGENT = "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36";
+    private String defaultUserAgent;
     private WebView mWebView;
     private View mCustomView;
     private CustomViewCallback mCustomViewCallback;
@@ -170,6 +173,7 @@ public class MainActivity extends Activity {
         mWebView = findViewById(R.id.activity_main_webview);
         mProgressBar = findViewById(R.id.progressBar);
         WebSettings webSettings = mWebView.getSettings();
+        defaultUserAgent = webSettings.getUserAgentString();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
@@ -303,11 +307,30 @@ public class MainActivity extends Activity {
             }
 
             if (isAllowed) {
+                boolean isGoogleLogin = host != null && (host.equals("accounts.google.com") || host.equals("www.accounts.google.com"));
+
+                if (isGoogleLogin && ALLOW_GOOGLE_LOGIN) {
+                    view.getSettings().setUserAgentString(CHROME_USER_AGENT);
+
+                    new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("אזהרה")
+                        .setMessage("גוגל אוסרת התחברות מדפדפנים מותאמים אישית. השימוש על אחריותך בלבד.")
+                        .setPositiveButton("הבנתי", (dialog, which) -> {
+                            mProgressBar.setVisibility(View.VISIBLE);
+                            view.loadUrl(url);
+                        })
+                        .setCancelable(false)
+                        .show();
+                    return true;
+                } else if (!isGoogleLogin) {
+                    view.getSettings().setUserAgentString(defaultUserAgent);
+                }
+
                 mProgressBar.setVisibility(View.VISIBLE);
                 view.loadUrl(url);
                 return true;
             } else {
-                Toast.makeText(view.getContext(), "This URL is not allowed (" + host + ")", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "כתובת זו אינה מורשית (" + host + ")", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
