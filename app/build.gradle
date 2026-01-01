@@ -16,7 +16,11 @@ android {
     compileSdkVersion 34
 
     defaultConfig {
-        buildConfigField "String", "ALLOWED_DOMAINS", "\"${System.getenv('ALLOWED_DOMAINS') ?: 'example.com'}\""
+        def allowGoogleLogin = System.getenv('ALLOW_GOOGLE_LOGIN') == 'true'
+        def baseDomains = System.getenv('ALLOWED_DOMAINS') ?: 'example.com'
+        def allowedDomains = allowGoogleLogin ? "${baseDomains},accounts.google.com" : baseDomains
+        buildConfigField "String", "ALLOWED_DOMAINS", "\"${allowedDomains}\""
+        buildConfigField "boolean", "ALLOW_GOOGLE_LOGIN", "${allowGoogleLogin}"
         buildConfigField "String", "STARTUP_URL", "\"${System.getenv('STARTUP_URL') ?: '' }\""
         buildConfigField "String", "VIEW_MODE", "\"${System.getenv('VIEW_MODE') ?: 'AUTO'}\""
         buildConfigField "boolean", "BLOCK_MEDIA", "${System.getenv('BLOCK_MEDIA') ?: 'false'}"
