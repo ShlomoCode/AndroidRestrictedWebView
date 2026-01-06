@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -316,15 +317,22 @@ public class MainActivity extends Activity {
                 if (isGoogleLogin && ALLOW_GOOGLE_LOGIN) {
                     view.getSettings().setUserAgentString(CHROME_USER_AGENT);
 
-                    new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("אזהרה")
-                        .setMessage("גוגל אוסרת התחברות מדפדפנים מותאמים אישית. השימוש על אחריותך בלבד.")
-                        .setPositiveButton("הבנתי", (dialog, which) -> {
-                            mProgressBar.setVisibility(View.VISIBLE);
-                            view.loadUrl(url);
-                        })
-                        .setCancelable(false)
-                        .show();
+                    SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+                    boolean warningAccepted = prefs.getBoolean("google_login_warning_accepted", false);
+
+                    if (!warningAccepted) {
+                        new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("אזהרה")
+                            .setMessage("גוגל אוסרת התחברות מדפדפנים מותאמים אישית. השימוש על אחריותך בלבד.")
+                            .setPositiveButton("הבנתי", (dialog, which) -> {
+                                prefs.edit().putBoolean("google_login_warning_accepted", true).apply();
+                                mProgressBar.setVisibility(View.VISIBLE);
+                                view.loadUrl(url);
+                            })
+                            .setCancelable(false)
+                            .show();
+                    }
+                    
                     return true;
                 } else if (!isGoogleLogin) {
                     view.getSettings().setUserAgentString(defaultUserAgent);
