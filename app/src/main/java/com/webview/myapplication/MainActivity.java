@@ -141,7 +141,11 @@ public class MainActivity extends Activity {
             if (null == mUploadMessage && null == mFilePathCallback) return;
             Uri result = intent == null || resultCode != RESULT_OK ? null : intent.getData();
             if (mFilePathCallback != null) {
-                mFilePathCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mFilePathCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+                } else {
+                    mFilePathCallback.onReceiveValue(result != null ? new Uri[]{result} : null);
+                }
                 mFilePathCallback = null;
             } else if (mUploadMessage != null) {
                 mUploadMessage.onReceiveValue(result);
