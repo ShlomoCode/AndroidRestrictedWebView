@@ -165,9 +165,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         AdBlockerUtil adBlockerUtil = AdBlockerUtil.getInstance();
         adBlockerUtil.initialize(this);
-        if (VIEW_MODE == "PORTRAIT") {
+        if (VIEW_MODE.equals("PORTRAIT")) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else if (VIEW_MODE == "LANDSCAPE") {
+        } else if (VIEW_MODE.equals("LANDSCAPE")) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
