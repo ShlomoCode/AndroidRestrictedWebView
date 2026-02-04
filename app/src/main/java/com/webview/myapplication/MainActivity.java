@@ -113,6 +113,7 @@ public class MainActivity extends Activity {
     private static final boolean BLOCK_MEDIA = BuildConfig.BLOCK_MEDIA;
     private static final boolean BLOCK_ADS = BuildConfig.BLOCK_ADS;
     private static final boolean NO_SSL = BuildConfig.NO_SSL;
+    private static final boolean HIDE_NETFREE = BuildConfig.HIDE_NETFREE;
     private static final boolean ALLOW_GOOGLE_LOGIN = BuildConfig.ALLOW_GOOGLE_LOGIN;
     private static final String CHROME_USER_AGENT = "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36";
     private String defaultUserAgent;
@@ -287,6 +288,18 @@ public class MainActivity extends Activity {
             String host = Uri.parse(url).getHost();
             boolean isAllowed = false;
 
+            if (url != null && url.startsWith("whatsapp://")) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    view.getContext().startActivity(intent);
+                    return true;
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "Error opening whatsapp, the application may not be installed", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+            }
+
             if (url.startsWith("tel:")) {
                 Intent tel = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
                 startActivity(tel);
@@ -361,9 +374,19 @@ public class MainActivity extends Activity {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             mProgressBar.setVisibility(View.GONE);
+
             if (BLOCK_MEDIA) {
                 view.loadUrl("javascript: (() => { function handle(node) { if (node.tagName === 'IMG' && node.style.visibility !== 'hidden' && node.width > 32 && node.height > 32) { const blankImageUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='; const { width, height } = window.getComputedStyle(node); node.src = blankImageUrl; node.style.visibility = 'hidden'; node.style.background = 'none'; node.style.backgroundImage = `url(${blankImageUrl})`; node.style.width = width; node.style.height = height; } else if (node.tagName === 'VIDEO' || node.tagName === 'IFRAME' || ((!node.type || node.type.includes('video')) && node.tagName === 'SOURCE') || node.tagName === 'OBJECT') { node.remove(); } } document.querySelectorAll('img,video,source,object,embed,iframe,[type^=video]').forEach(handle); const observer = new MutationObserver((mutations) => mutations.forEach((mutation) => mutation.addedNodes.forEach(handle))); observer.observe(document.body, { childList: true, subtree: true }); })();");
             }
+
+            // remove netfree card
+            if (HIDE_NETFREE)
+                view.loadUrl("javascript: (() => { " +
+                        "const element = document.querySelector('div#netfree-popup-window'); " +
+                        "if (element) { " +
+                        "   element.parentNode.remove(); " +
+                        "} " +
+                        "})();");
         }
 
         @Override

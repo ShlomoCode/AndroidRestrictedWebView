@@ -2,37 +2,53 @@ plugins {
     id 'com.android.application'
 }
 
+def loadEnvProps() {
+    def envFile = new File("${project.projectDir}/.env")
+    def props = new Properties()
+    if (envFile.exists()) {
+        envFile.withInputStream { stream ->
+            props.load(new InputStreamReader(stream, "UTF-8"))
+        }
+    }
+    return props
+}
+
+def getEnvValue(key, defaultValue = '') {
+    def props = loadEnvProps()
+    return props.getProperty(key, System.getenv(key) ?: defaultValue)
+}
 
 android {
    signingConfigs {
         release {
             storeFile = file("keystore/android_keystore.jks")
-            storePassword System.getenv("SIGNING_STORE_PASSWORD")
-            keyAlias System.getenv("SIGNING_KEY_ALIAS")
-            keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+            storePassword getEnvValue('SIGNING_STORE_PASSWORD')
+            keyAlias getEnvValue('SIGNING_KEY_ALIAS')
+            keyPassword getEnvValue('SIGNING_KEY_PASSWORD')
         }
     }
     
     compileSdkVersion 34
 
     defaultConfig {
-        def allowGoogleLogin = System.getenv('ALLOW_GOOGLE_LOGIN') == 'true'
-        def baseDomains = System.getenv('ALLOWED_DOMAINS') ?: 'example.com'
+        def allowGoogleLogin = getEnvValue('ALLOW_GOOGLE_LOGIN') == 'true'
+        def baseDomains = getEnvValue('ALLOWED_DOMAINS') ?: 'example.com'
         def allowedDomains = allowGoogleLogin ? "${baseDomains},accounts.google.com" : baseDomains
         buildConfigField "String", "ALLOWED_DOMAINS", "\"${allowedDomains}\""
         buildConfigField "boolean", "ALLOW_GOOGLE_LOGIN", "${allowGoogleLogin}"
-        buildConfigField "String", "STARTUP_URL", "\"${System.getenv('STARTUP_URL') ?: '' }\""
-        buildConfigField "String", "VIEW_MODE", "\"${System.getenv('VIEW_MODE') ?: 'AUTO'}\""
-        buildConfigField "boolean", "BLOCK_MEDIA", "${System.getenv('BLOCK_MEDIA') ?: 'false'}"
-        buildConfigField "boolean", "BLOCK_ADS", "${System.getenv('BLOCK_ADS') ?: 'true'}"
-        buildConfigField "boolean", "NO_SSL", "${System.getenv('NO_SSL') ?: 'false'}"
-        resValue "string", "app_name", System.getenv('APP_NAME') ?: "My Application"
-        applicationId System.getenv('APPLICATION_ID') ?: "com.webview.myapplication"
+        buildConfigField "String", "STARTUP_URL", "\"${getEnvValue('STARTUP_URL') ?: '' }\""
+        buildConfigField "String", "VIEW_MODE", "\"${getEnvValue('VIEW_MODE') ?: 'AUTO'}\""
+        buildConfigField "boolean", "BLOCK_MEDIA", "${getEnvValue('BLOCK_MEDIA') ?: 'false'}"
+        buildConfigField "boolean", "BLOCK_ADS", "${getEnvValue('BLOCK_ADS') ?: 'true'}"
+        buildConfigField "boolean", "NO_SSL", "${getEnvValue('NO_SSL') ?: 'false'}"
+        buildConfigField "boolean", "HIDE_NETFREE", "${getEnvValue('HIDE_NETFREE', 'true')}"
+        resValue "string", "app_name", getEnvValue('APP_NAME') ?: "My Application"
+        applicationId getEnvValue('APPLICATION_ID') ?: "com.webview.myapplication"
         
         minSdkVersion 16
         targetSdkVersion 34
         versionCode 1
-        versionName "1.0"
+        versionName getEnvValue('VERSION', '1.0.0')
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,6 +68,43 @@ android {
     namespace 'com.webview.myapplication'
 }
 
+def appIconPath = getEnvValue('APP_ICON_PATH')
+
+task replaceAppIcons {
+    doLast {
+        if (appIconPath && !appIconPath.isEmpty()) {
+            def iconFile = file(appIconPath)
+            if (!iconFile.exists()) {
+                project.logger.warn("App icon not found at: ${appIconPath}. Skipping icon replacement.")
+                return
+            }
+
+            android.sourceSets.main.res.srcDirs.each { resDir ->
+                file(resDir).eachDirMatch(~/^mipmap-.*$/) { mipmapDir ->
+                    println "Replacing icons in ${mipmapDir.name}"
+                    copy {
+                        from iconFile
+                        into mipmapDir
+                        rename { 'ic_launcher.png' }
+                    }
+                    copy {
+                        from iconFile
+                        into mipmapDir
+                        rename { 'ic_launcher_round.png' }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// This is the correct, more compatible way to hook into the build process.
+// It finds the 'merge<VariantName>Resources' task for each variant and makes it depend on our icon task.
+android.applicationVariants.all { variant ->
+    variant.mergeResources.dependsOn(replaceAppIcons)
+}
+
+
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -59,4 +112,5 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 }
