@@ -19,7 +19,14 @@ def getEnvValue(key, defaultValue = '') {
 }
 
 android {
-   signingConfigs {
+    namespace 'com.webview.myapplication'
+    compileSdkVersion 34
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    signingConfigs {
         release {
             storeFile = file("keystore/android_keystore.jks")
             storePassword getEnvValue('SIGNING_STORE_PASSWORD')
@@ -27,8 +34,6 @@ android {
             keyPassword getEnvValue('SIGNING_KEY_PASSWORD')
         }
     }
-    
-    compileSdkVersion 34
 
     defaultConfig {
         def allowGoogleLogin = getEnvValue('ALLOW_GOOGLE_LOGIN') == 'true'
@@ -65,7 +70,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    namespace 'com.webview.myapplication'
 }
 
 def appIconPath = getEnvValue('APP_ICON_PATH')
@@ -98,15 +102,11 @@ task replaceAppIcons {
     }
 }
 
-// This is the correct, more compatible way to hook into the build process.
-// It finds the 'merge<VariantName>Resources' task for each variant and makes it depend on our icon task.
 android.applicationVariants.all { variant ->
     variant.mergeResources.dependsOn(replaceAppIcons)
 }
 
-
 dependencies {
-
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     testImplementation 'junit:junit:4.13.2'
