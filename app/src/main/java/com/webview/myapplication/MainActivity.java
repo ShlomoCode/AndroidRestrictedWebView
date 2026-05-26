@@ -114,7 +114,9 @@ public class MainActivity extends Activity {
     private static final boolean BLOCK_ADS = BuildConfig.BLOCK_ADS;
     private static final boolean NO_SSL = BuildConfig.NO_SSL;
     private static final boolean ALLOW_GOOGLE_LOGIN = BuildConfig.ALLOW_GOOGLE_LOGIN;
+    private static final boolean DESKTOP_MODE = BuildConfig.DESKTOP_MODE;
     private static final String CHROME_USER_AGENT = "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36";
+    private static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
     private String defaultUserAgent;
     private WebView mWebView;
     private View mCustomView;
@@ -178,7 +180,8 @@ public class MainActivity extends Activity {
         mWebView = findViewById(R.id.activity_main_webview);
         mProgressBar = findViewById(R.id.progressBar);
         WebSettings webSettings = mWebView.getSettings();
-        defaultUserAgent = webSettings.getUserAgentString();
+        defaultUserAgent = DESKTOP_MODE ? DESKTOP_USER_AGENT : webSettings.getUserAgentString();
+        webSettings.setUserAgentString(defaultUserAgent);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
